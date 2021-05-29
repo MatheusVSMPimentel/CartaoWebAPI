@@ -9,7 +9,7 @@ using CartaoWebAPI.Models; //Models
 
 namespace CartaoWebAPI.Controllers
 {
-    [Route("api/cartao")]
+    [Route("api/cartao")] // Antes [Route("api/[Controller]")]
     [ApiController]
     public class CartaosController : Controller    {
         private readonly CartaoContext _context;
@@ -24,9 +24,10 @@ namespace CartaoWebAPI.Controllers
         [HttpGet("{email}")]
         public async Task<ActionResult<IEnumerable<Cartao>>> GetCartaos(string email)
         {
+            //Recebe o email via parametro pesquisa no banco de dados o ID do usuario
             Usuario usuarioDb = new();
             usuarioDb =  _context.Usuarios.SingleOrDefault(bd => bd.UsuarioEmail == email);
-            
+            //Faz a pesquisa na tabela Cartaos onde a FK é igual ao usuario informado e retorna uma lista de cartões
             return await _context.Cartaos.Where(b => b.UsuarioId.Equals(usuarioDb.Id)).ToListAsync();
         }
 
@@ -78,31 +79,36 @@ namespace CartaoWebAPI.Controllers
 
         private Cartao ConstrutoCartao() {
             //Função Geradora de dados pro cartão
-            DateTime now = DateTime.Now;
-            Random randNum = new();
-            Cartao cartao = new();
+            DateTime now = DateTime.Now; //Objeto de tempo com função para extrair o tempo exato da criação do cartão
+            Random randNum = new(); //Objeto com função para numeros randomicos
+            Cartao cartao = new(); //Obejto cartão que será retornado no fim da função
             for (int i = 0; i < 4; i++)
             {
+                //For para inserir 4 numeros 4 vezes
                 cartao.CartaoNumero += randNum.Next(1000, 9999).ToString();
             }
             for (int i = 0; i < 3; i++)
             {
+                //For para inserir 1 numeros 3 vezes
                 cartao.CartaoCVV += randNum.Next(0, 9).ToString();
             }
             for (int i = 0; i < 2; i++)
             {
+                //For para inserir 2 numeros referente ao mes e ano 2 vezes
                 if (i == 1)
                 {
+                    //if para ano
                     cartao.CartaoValidade += "/";
                     cartao.CartaoValidade += randNum.Next(22, 99).ToString();
                 }
                 else
                 {
+                    //else para mes
                     cartao.CartaoValidade = randNum.Next(0, 12).ToString();
                 }
             }
-            cartao.CartaoCriacao = now;
-            return cartao;
+            cartao.CartaoCriacao = now; //Inserindo a data de criação no cartão
+            return cartao; //Retorno do objeto cartão
         }
     }
 }
